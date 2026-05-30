@@ -1139,14 +1139,19 @@ else{init();}
   }
 
   function callGemini(apiKey,rem,g){
-    var prompt="あなたは栄養管理の専門家です。以下の残り栄養素に合わせた夕食メニューを2パターン提案してください。\n\n"+
+    var prompt="あなたはスポーツ栄養士です。以下の【残りPFC目標値】にできる限り近づけるため、具体的な食品の組み合わせを2パターン提案してください。\n\n"+
+      "【残りPFC目標値（この数値にプラスマイナスゼロを目指す）】\n"+
       "残りカロリー: "+Math.round(rem.cal)+"kcal\n"+
       "残りタンパク質: "+rem.p.toFixed(1)+"g\n"+
       "残り脂質: "+rem.f.toFixed(1)+"g\n"+
       "残り炭水化物: "+rem.c.toFixed(1)+"g\n\n"+
-      "目標: "+g.type+"\n\n"+
-      "以下のJSON形式で出力してください。余分なテキストは不要です：\n"+
-      '[{"title":"メニュー名","tag":"タグ(高タンパク/低カロリー/バランス)","items":[{"food":"食品名","amount":"量","note":"調理法"}],"total_cal":数値,"total_p":数値,"total_f":数値,"total_c":数値,"comment":"一言コメント"},...]';
+      "【ルール】\n"+
+      "1. 各パターンの合計値が残りPFCに±10%以内に収まるように食品と量を調整すること\n"+
+      "2. コンビニ・スーパーで入手できる具体的な食品名と正確なグラム数を記載すること\n"+
+      "3. 目標に近づけるため食品の量（g）を細かく調整すること\n"+
+      "4. total_cal/total_p/total_f/total_cは実際に計算した数値を入れること\n\n"+
+      "以下のJSON形式のみで出力してください（余分なテキスト不要）：\n"+
+      '[{"title":"メニュー名","tag":"タグ","items":[{"food":"食品名","amount":"150gなど具体的な量","note":"調理法や注意"}],"total_cal":数値,"total_p":数値,"total_f":数値,"total_c":数値,"comment":"残りPFCとの差を述べる"},...]';
 
     return fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{
       method:"POST",
