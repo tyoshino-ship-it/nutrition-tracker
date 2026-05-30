@@ -884,7 +884,7 @@ var MEAL_TYPES=[
 ];
 var selMT="breakfast";
 var mealItems=[];
-var searchTimer=null;
+var searchTimer=null,blurTimer=null;
 
 function buildUI(){
   var page=document.getElementById("page-mmeal");
@@ -945,7 +945,7 @@ function buildUI(){
     searchTimer=setTimeout(function(){doSearch(q);},150);
   });
   document.getElementById("fSearch").addEventListener("blur",function(){
-    setTimeout(function(){var r=document.getElementById("fResults");if(r)r.style.display="none";},500);
+      blurTimer=setTimeout(function(){var r=document.getElementById("fResults");if(r)r.style.display="none";},500);
   });
   document.getElementById("btnAdd").addEventListener("click",addFood);
   document.getElementById("btnClr").addEventListener("click",clearForm);
@@ -977,6 +977,7 @@ function doSearch(q){
       "</div></div>";
   }).join("");
   el.style.display="block";
+    el.ontouchstart=function(){clearTimeout(blurTimer);};
     el.querySelectorAll(".sri").forEach(function(row){
 
     row.addEventListener("mouseover",function(){this.style.background="var(--color-surface-offset)";});
@@ -989,7 +990,7 @@ function doSearch(q){
       document.getElementById("fSearch").value="";
     });
   });
-        row.addEventListener("touchstart",function(e){e.preventDefault();var idx=parseInt(row.dataset.i);fillForm(hits[idx]);el.style.display="none";document.getElementById("fSearch").value="";});
+              row.addEventListener("touchstart",function(e){clearTimeout(blurTimer);e.preventDefault();var idx=parseInt(row.dataset.i);fillForm(hits[idx]);el.style.display="none";document.getElementById("fSearch").value="";});
 }
 
 function fillForm(f){
