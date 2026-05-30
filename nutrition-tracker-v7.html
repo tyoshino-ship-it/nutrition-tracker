@@ -1073,7 +1073,7 @@ function clearForm(){
   ["fName","fAmt","fCal","fP","fF","fC"].forEach(function(id){
     var el=document.getElementById(id);if(el){el.value="";el._base=null;el._manualBase=null;el.oninput=null;}
   });
-  var u=document.getElementById("fUnit");if(u)u.value="g";
+  var u=document.getElementById("fUnit");if(u)u.value="g";var amtEl2=document.getElementById("fAmt");if(amtEl2){amtEl2.onfocus=function(){if(!amtEl2._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl2.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl2._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl2.oninput=function(){var _amt=parseFloat(amtEl2.value)||0,_b=amtEl2._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);};};}
 }
 
 function renderLog(){
