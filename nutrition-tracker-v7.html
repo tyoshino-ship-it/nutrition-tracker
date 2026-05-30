@@ -236,10 +236,69 @@ button{cursor:pointer;background:none;border:none;}
   </div>
 
   <!-- 食事入力 -->
-  <div class="page" id="page-meal"></div>
+  <div class="page" id="page-meal">
+      <div class="card">
+        <div class="card-head">🍽️ 食事タイプを選択</div>
+        <div id="mtBtns" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem;">
+          <button class="btn btn-s" type="button" data-mt="breakfast">🌅 朝食</button>
+          <button class="btn btn-s" type="button" data-mt="lunch">☀️ 昼食</button>
+          <button class="btn btn-s" type="button" data-mt="snack">🍎 間食</button>
+          <button class="btn btn-s" type="button" data-mt="dinner">🌙 夕食</button>
+          <button class="btn btn-s" type="button" data-mt="training">💪 サプリ</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">🔍 食品検索</div>
+        <div style="position:relative;margin-bottom:1rem;">
+          <input class="inp" type="text" id="fSearch" placeholder="例：セブン サラダチキン、バナナ…" autocomplete="off" style="width:100%;">
+          <div id="fResults" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--color-card);border:1px solid var(--color-divider);border-radius:var(--radius-md);z-index:100;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div style="border-top:1px solid var(--color-divider);padding-top:1rem;">
+          <div style="font-size:.82rem;font-weight:700;color:var(--color-text-muted);margin-bottom:.75rem;">✏️ 手動入力 / 量の調整</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div class="field" style="grid-column:1/-1"><label class="label" for="fName">食品名</label><input class="inp" type="text" id="fName" autocomplete="off"></div>
+            <div class="field"><label class="label" for="fAmt">量</label><input class="inp" type="number" id="fAmt" placeholder="100" step="0.1" min="0"></div>
+            <div class="field"><label class="label" for="fUnit">単位</label><select class="inp" id="fUnit"><option value="g">g</option><option value="ml">ml</option><option value="個">個</option><option value="本">本</option><option value="杯">杯</option><option value="枚">枚</option><option value="パック">パック</option></select></div>
+            <div class="field"><label class="label" for="fCal">カロリー(kcal)</label><input class="inp" type="number" id="fCal" placeholder="0" step="0.1" min="0"></div>
+            <div class="field"><label class="label" for="fP">タンパク質(g)</label><input class="inp" type="number" id="fP" placeholder="0" step="0.1" min="0"></div>
+            <div class="field"><label class="label" for="fF">脂質(g)</label><input class="inp" type="number" id="fF" placeholder="0" step="0.1" min="0"></div>
+            <div class="field"><label class="label" for="fC">炭水化物(g)</label><input class="inp" type="number" id="fC" placeholder="0" step="0.1" min="0"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-p" type="button" id="btnAdd">➕ 追加</button>
+            <button class="btn btn-s" type="button" id="btnClr">クリア</button>
+            <button class="btn btn-s" type="button" id="btnSaveCustom" style="font-size:.78rem;">⭐ 保存</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">🍽️ 本日の食事ログ</div>
+        <div id="mealLog"></div>
+        <div class="btn-row" style="margin-top:1rem;">
+          <div style="font-size:.95rem;font-weight:700;">合計: <span id="totCal">0</span> kcal / P:<span id="totP">0</span>g / F:<span id="totF">0</span>g / C:<span id="totC">0</span>g</div>
+        </div>
+      </div>
+    </div>
 
   <!-- 体組成 -->
-  <div class="page" id="page-body"></div>
+  <div class="page" id="page-body">
+      <div class="card">
+        <div class="card-head">📏 体組成入力</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.5rem;">
+          <div class="field"><label class="label" for="bDate">日付</label><input class="inp" type="date" id="bDate"></div>
+          <div class="field"><label class="label" for="bWeight">体重(kg)</label><input class="inp" type="number" id="bWeight" placeholder="70" step="0.1" min="0"></div>
+          <div class="field"><label class="label" for="bFat">体脂肪率(%)</label><input class="inp" type="number" id="bFat" placeholder="20" step="0.1" min="0"></div>
+          <div class="field"><label class="label" for="bMuscle">筋肉量(kg)</label><input class="inp" type="number" id="bMuscle" placeholder="50" step="0.1" min="0"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-p" type="button" id="btnBodySave">💾 保存</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">📊 体組成履歴</div>
+        <div id="bodyLog"></div>
+      </div>
+    </div>
 
   <!-- 履歴 -->
   <div class="page" id="page-history">
