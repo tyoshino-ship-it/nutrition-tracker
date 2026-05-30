@@ -353,7 +353,7 @@ button{cursor:pointer;background:none;border:none;}
     var u=localStorage.getItem("nt_url")||"https://ufbpqjacybhdjisnehsm.supabase.co",k=localStorage.getItem("nt_key")||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmYnBxamFjeWJoZGppc25laHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDY1NTgsImV4cCI6MjA5NTYyMjU1OH0.hdqjLtCk1yiboYGsNEznBK-k88dUX24gHFppMatzCg8";
     if(u&&k)initSB(u,k);else setConn(false,"API未設定");
 
-    $("btnSaveSettings").addEventListener("click",saveSettings);
+    document.getElementById("fAmt").addEventListener("input",function(){var _b=this._manualBase;if(_b&&_b.baseAmt>0){var _r=(parseFloat(this.value)||0)/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}});["fCal","fP","fF","fC"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){var _a=document.getElementById("fAmt");_a._manualBase={baseAmt:parseFloat(_a.value)||100,cal:parseFloat(document.getElementById("fCal").value)||0,p:parseFloat(document.getElementById("fP").value)||0,f:parseFloat(document.getElementById("fF").value)||0,c:parseFloat(document.getElementById("fC").value)||0};});});$("btnSaveSettings").addEventListener("click",saveSettings);
     $("btnAutoCalc").addEventListener("click",autoCalc);
     $("btnAiOptimize").addEventListener("click",aiOptimizePfc);
     $("btnSaveCfg").addEventListener("click",saveCfg);
