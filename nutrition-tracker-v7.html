@@ -945,7 +945,7 @@ function buildUI(){
     searchTimer=setTimeout(function(){doSearch(q);},150);
   });
   document.getElementById("fSearch").addEventListener("blur",function(){
-    setTimeout(function(){var r=document.getElementById("fResults");if(r)r.style.display="none";},200);
+    setTimeout(function(){var r=document.getElementById("fResults");if(r)r.style.display="none";},500);
   });
   document.getElementById("btnAdd").addEventListener("click",addFood);
   document.getElementById("btnClr").addEventListener("click",clearForm);
@@ -989,6 +989,7 @@ function doSearch(q){
       document.getElementById("fSearch").value="";
     });
   });
+        row.addEventListener("touchstart",function(e){e.preventDefault();var idx=parseInt(row.dataset.i);fillForm(hits[idx]);el.style.display="none";document.getElementById("fSearch").value="";});
 }
 
 function fillForm(f){
