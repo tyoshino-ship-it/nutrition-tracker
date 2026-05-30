@@ -961,6 +961,7 @@ function doSearch(q){
       "</div></div>";
   }).join("");
   el.style.display="block";
+    el.querySelectorAll(".sri").forEach(function(row){
 
     row.addEventListener("mouseover",function(){this.style.background="var(--color-surface-offset)";});
     row.addEventListener("mouseout",function(){this.style.background="";});
@@ -990,6 +991,7 @@ function fillForm(f){
     document.getElementById("fCal").value=f.cal;
     document.getElementById("fP").value=f.p;
     document.getElementById("fF").value=f.f;
+    document.getElementById("fC").value=f.c;
     amtEl.value=f.baseAmt||100;
     amtEl._base=f;
     amtEl.oninput=function(){
