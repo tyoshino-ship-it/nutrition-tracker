@@ -171,7 +171,14 @@ button{cursor:pointer;background:none;border:none;}
         <button class="btn btn-p" type="button" id="btnSuggest" style="padding:.5rem 1rem;font-size:.82rem;">✨ AIで提案</button>
       </div>
       <div id="suggestArea">
-        <div class="empty"><div class="empty-icon">🌙</div><div class="empty-msg">「AIで提案」ボタンを押すと残り栄養素から夕食メニューを提案します</div></div>
+        <div class="empty"><div class="empty-icon">🌙</div><div class="empty-msg">「AIで提案」ボタンを押すと残り栄養素から夕食メニューを提案します</div>
+      <!-- 1日完了 -->
+      <div class="card" id="dayCompleteCard">
+        <div class="card-head">🏁 1日の記録を完了する</div>
+        <p style="font-size:.875rem;color:var(--color-text-muted);margin-bottom:1rem;line-height:1.6;">今日の食事記録をAIが分析し、達成度・改善ポイントをフィードバックします。</p>
+        <button class="day-complete-btn" id="btnDayComplete" type="button">✅ 1日を完了してAIに評価してもらう</button>
+      </div>
+      <div id="aiEvalResult" style="display:none;"></div></div>
       </div>
     </div>
 
