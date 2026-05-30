@@ -354,6 +354,7 @@ button{cursor:pointer;background:none;border:none;}
     if(u&&k)initSB(u,k);else setConn(false,"API未設定");
 
     document.getElementById("fAmt").addEventListener("input",function(){var _b=this._manualBase;if(_b&&_b.baseAmt>0){var _r=(parseFloat(this.value)||0)/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}});["fCal","fP","fF","fC"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){var _a=document.getElementById("fAmt");_a._manualBase={baseAmt:parseFloat(_a.value)||100,cal:parseFloat(document.getElementById("fCal").value)||0,p:parseFloat(document.getElementById("fP").value)||0,f:parseFloat(document.getElementById("fF").value)||0,c:parseFloat(document.getElementById("fC").value)||0};});});$("btnSaveSettings").addEventListener("click",saveSettings);
+document.getElementById("fCal").addEventListener("input",function(){var _cal=parseFloat(this.value)||0;var _sCal=parseFloat(document.getElementById("s_cal").value)||0;var _sPro=parseFloat(document.getElementById("s_pro").value)||0;var _sFat=parseFloat(document.getElementById("s_fat").value)||0;var _sCarb=parseFloat(document.getElementById("s_carb").value)||0;if(_sCal>0&&(_sPro>0||_sFat>0||_sCarb>0)){var _r=_cal/_sCal;document.getElementById("fP").value=(_sPro*_r).toFixed(1);document.getElementById("fF").value=(_sFat*_r).toFixed(1);document.getElementById("fC").value=(_sCarb*_r).toFixed(1);}});
     $("btnAutoCalc").addEventListener("click",autoCalc);
     $("btnAiOptimize").addEventListener("click",aiOptimizePfc);
     $("btnSaveCfg").addEventListener("click",saveCfg);
@@ -579,6 +580,8 @@ button{cursor:pointer;background:none;border:none;}
       toast("✅ AI最適化完了："+d.reason,"ok");
     }catch(e){toast("❌ AI最適化に失敗しました","ng");}
     btn.disabled=false;btn.textContent="🤖 AIがPFCを最適化";
+
+
   }
 
   async function runDayComplete(){
@@ -1181,7 +1184,7 @@ function init(){
 }
 if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);document.addEventListener("DOMContentLoaded",function(){var amtEl3=document.getElementById("fAmt");if(amtEl3){amtEl3.onfocus=function(){if(!amtEl3._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl3.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl3._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl3.oninput=function(){var _amt=parseFloat(amtEl3.value)||0,_b=amtEl3._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}};};});;}
 else{init();}
-})();
+});
 </script>
 <!-- ===== 夕食提案スクリプト ===== -->
 <script>
