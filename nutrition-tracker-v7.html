@@ -1048,7 +1048,7 @@ function saveCustomFood(){
   var c=parseFloat(document.getElementById("fC").value)||0;
   var unit=document.getElementById("fUnit").value;
   if(!name){if(window._toast)window._toast("食品名を入力してください","ng");return;}
-  var food={name:name,cal:cal,p:p,f:f,c:c,unit:unit,category:"カスタム",fixed:true};
+  var food={name:name,cal:cal,p:p,f:f,c:c,unit:unit,category:"カスタム",fixed:false};
   var arr=[];try{arr=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
   if(arr.find(function(x){return x.name===name;})){if(window._toast)window._toast("既に保存済みです","info");return;}
   arr.unshift(food);localStorage.setItem("nt_custom_db",JSON.stringify(arr));
