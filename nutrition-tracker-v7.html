@@ -422,6 +422,34 @@ button{cursor:pointer;background:none;border:none;}
       goals={cal:d.goal_calories||1500,p:d.goal_protein_g||130,f:d.goal_fat_g||42,c:d.goal_carb_g||150,type:d.goal_type||"fat_loss"};
       localStorage.setItem("nt_goals",JSON.stringify(goals));
       applyGoalsToForm(goals);updateDashboard();updateGoalBadge(d.goal_type);
+    loadTodayFromDB();
+    }).catch(function(){});
+  }
+  function loadTodayFromDB(){
+    var sb=window._sb;
+    if(!sb)return;
+    var today=new Date().toISOString().slice(0,10);
+    sb.from("meal_logs").select("id,meal_type").eq("user_key","default").eq("log_date",today).then(function(r){
+      if(r.error||!r.data||!r.data.length)return;
+      var logIds=r.data.map(function(x){return x.id;});
+      var mealTypeMap={};r.data.forEach(function(x){mealTypeMap[x.id]=x.meal_type;});
+      sb.from("meal_log_items").select("*").in("meal_log_id",logIds).then(function(r2){
+        if(r2.error||!r2.data||!r2.data.length)return;
+        var MEAL_LABELS={"breakfast":"🌅 朝食","lunch":"☀️ 昼食","snack":"🍵 間食","dinner":"🌙 夕食","training":"🏋️ サプリ"};
+        var newItems=r2.data.map(function(row){
+          var mt=mealTypeMap[row.meal_log_id]||"breakfast";
+          return{id:row.id,db_id:row.id,mealType:mt,mealLabel:MEAL_LABELS[mt]||mt,
+            name:row.food_name,amount:row.amount,unit:row.unit_label||"g",
+            cal:row.calories||0,p:row.protein_g||0,f:row.fat_g||0,c:row.carb_g||0};
+        });
+        if(newItems.length>0){
+          mealItems=newItems;
+          save();updateTotals();
+          if(typeof renderLog==="function")renderLog();
+          if(typeof renderDashLog==="function")renderDashLog();
+          if(window._toast)window._toast("✅ "+newItems.length+"件の食事データを同期しました","info");
+        }
+      }).catch(function(){});
     }).catch(function(){});
   }
   function autoCalc(){
