@@ -415,10 +415,25 @@ button{cursor:pointer;background:none;border:none;}
       setConn(null,"確認中…");
       sb.from("user_settings").select("user_key").limit(1).then(function(r){
         if(r.error)throw r.error;
-        setConn(true,"接続済み");connected=true;window._sb=sb;window._goals=goals;loadSettingsFromDB();
+        setConn(true,"接続済み");connected=true;window._sb=sb;window._goals=goals;loadSettingsFromDB();restoreCustomFoodsFromDB();
       }).catch(function(){setConn(false,"接続失敗");});
     }catch(e){setConn(false,"初期化エラー");}
   }
+  function restoreCustomFoodsFromDB(){
+  if(!sb)return;
+  sb.from("food_master").select("name,category,unit_label,unit_amount,calories,protein_g,fat_g,carb_g").eq("is_user_custom",true).then(function(r){
+    if(r.error||!r.data||!r.data.length)return;
+    var arr=[];try{arr=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
+    var changed=false;
+    r.data.forEach(function(f){
+      if(!arr.find(function(x){return x.name===f.name;})){
+        arr.push({name:f.name,cal:f.calories,p:f.protein_g,f:f.fat_g,c:f.carb_g,unit:f.unit_label,baseAmt:f.unit_amount||100,category:f.category||'カスタム',fixed:false});
+        changed=true;
+      }
+    });
+    if(changed){localStorage.setItem("nt_custom_db",JSON.stringify(arr));renderCustomFoods();}
+  });
+}
   function testConn(){
     var u=$("cfg_url").value.trim(),k=$("cfg_key").value.trim();
     if(!u||!k){toast("URLとKeyを入力してください","ng");return;}
@@ -1066,7 +1081,7 @@ if(!name){if(window._toast)window._toast("食品名を入力してください",
       if(r.data&&r.data.length>0){return;}
       sb.from("food_master").insert({
         name:name,category:"カスタム",subcategory:"ユーザー登録",
-        unit_label:unit,unit_amount:1,
+        unit_label:unit,unit_amount:amt,
         calories:cal,protein_g:p,fat_g:f,carb_g:c,
         is_user_custom:true,is_verified:false,
         notes:"ユーザー手入力"
