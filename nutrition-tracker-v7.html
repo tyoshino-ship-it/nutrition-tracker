@@ -1558,12 +1558,9 @@ async function load(){
   renderCal(days,data);renderPfc(days,data);renderDays(days,data);
 }
 document.addEventListener('DOMContentLoaded',function(){
-  document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){if(t.dataset.page==='history')setTimeout(load,100);});});
   var prev=document.getElementById('histPrev'),next=document.getElementById('histNext');
   if(prev)prev.addEventListener('click',function(){weekOffset--;load();});
   if(next)next.addEventListener('click',function(){if(weekOffset<0){weekOffset++;load();}});
-  var timer=setInterval(function(){if(window._sb!==undefined){clearInterval(timer);load();}},300);
-  setTimeout(function(){clearInterval(timer);load();},5000);
 });
 })();
 </script>
