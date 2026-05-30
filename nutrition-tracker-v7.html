@@ -96,6 +96,20 @@ button{cursor:pointer;background:none;border:none;}
 .suggest-card{background:var(--color-surface-offset);border-radius:var(--radius-lg);padding:1rem;margin-bottom:.75rem;border:1px solid var(--color-border);}
 .suggest-loading{display:flex;align-items:center;gap:.75rem;padding:1.5rem;color:var(--color-text-muted);font-size:.875rem;}
 .suggest-note{font-size:.72rem;color:var(--color-text-faint);margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--color-divider);}
+
+.day-complete-btn{width:100%;padding:1rem;font-size:1rem;font-weight:700;background:linear-gradient(135deg,var(--color-primary),var(--color-primary-hover));color:#fff;border:none;border-radius:var(--radius-xl);cursor:pointer;margin-top:.5rem;transition:all var(--trans);box-shadow:var(--shadow-md);}
+.day-complete-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg);}
+.day-complete-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.ai-eval-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:1.5rem;margin-bottom:1rem;box-shadow:var(--shadow-sm);}
+.ai-eval-score{font-size:3rem;text-align:center;margin-bottom:.5rem;}
+.ai-eval-title{font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1.25rem;color:var(--color-primary);}
+.ai-eval-section{margin-bottom:1rem;}
+.ai-eval-section-title{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:.5rem;}
+.ai-eval-text{font-size:.9rem;line-height:1.7;color:var(--color-text);}
+.ai-eval-tag{display:inline-block;padding:.2rem .7rem;border-radius:var(--radius-full);font-size:.75rem;font-weight:600;margin:.2rem;}
+.tag-good{background:var(--color-primary-highlight);color:var(--color-primary);}
+.tag-warn{background:#fff3cd;color:#856404;}
+.tag-tip{background:var(--color-surface-offset);color:var(--color-text-muted);}
 </style>
 </head>
 <body>
@@ -252,6 +266,7 @@ button{cursor:pointer;background:none;border:none;}
     $("btnSaveCfg").addEventListener("click",saveCfg);
     $("btnTestConn").addEventListener("click",testConn);
     $("themeBtn").addEventListener("click",toggleTheme);
+    $("btnDayComplete").addEventListener("click", runDayComplete);
 
     document.querySelectorAll(".tab").forEach(function(t){
       t.addEventListener("click",function(){switchTab(t.dataset.page);});
@@ -404,6 +419,83 @@ button{cursor:pointer;background:none;border:none;}
   }
 
   // グローバル公開
+  
+  async function runDayComplete(){
+    var gemKey = localStorage.getItem("nt_gem");
+    if(!gemKey){
+      toast("⚠️ Gemini APIキーを目標設定タブで設定してください","ng");
+      return;
+    }
+    if(mealItems && mealItems.length===0 && typeof window._getMealItems==="function"){
+      var items = window._getMealItems();
+      if(!items||items.length===0){toast("⚠️ 今日の食事が記録されていません","ng");return;}
+    }
+    var btn = $("btnDayComplete");
+    btn.disabled = true;
+    btn.textContent = "🤖 AIが分析中…";
+    var g = goals;
+    var t = totals;
+    var calPct = g.cal>0?Math.round(t.cal/g.cal*100):0;
+    var pPct = g.p>0?Math.round(t.p/g.p*100):0;
+    var fPct = g.f>0?Math.round(t.f/g.f*100):0;
+    var cPct = g.c>0?Math.round(t.c/g.c*100):0;
+    var goalLabel = {"fat_loss":"脂肪燃焼","muscle_gain":"筋肉増量","maintain":"体型維持"}[g.type]||g.type;
+    var userName = $("s_name")?($("s_name").value||"あなた"):"あなた";
+    var prompt = `あなたはプロの栄養士です。以下のデータをもとに、${userName}さんの今日の食事を日本語で評価してください。
+
+【目標】${goalLabel}
+【目標PFC】カロリー:${g.cal}kcal / タンパク質:${g.p}g / 脂質:${g.f}g / 炭水化物:${g.c}g
+【今日の実績】カロリー:${Math.round(t.cal)}kcal(${calPct}%) / タンパク質:${t.p.toFixed(1)}g(${pPct}%) / 脂質:${t.f.toFixed(1)}g(${fPct}%) / 炭水化物:${t.c.toFixed(1)}g(${cPct}%)
+
+以下のJSON形式のみで回答してください（余分なテキスト不要）:
+{
+  "score": "A〜Eの1文字",
+  "scoreEmoji": "スコアに合う絵文字1つ",
+  "headline": "20文字以内の総評",
+  "good": ["良かった点を2〜3つ（各30文字以内）"],
+  "improve": ["改善点を1〜2つ（各30文字以内）"],
+  "tomorrow": ["明日へのアドバイスを1〜2つ（各30文字以内）"]
+}`;
+
+    try{
+      var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+gemKey,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+      });
+      var json = await res.json();
+      var raw = json.candidates[0].content.parts[0].text;
+      var match = raw.match(/\{[\s\S]*\}/);
+      if(!match) throw new Error("parse error");
+      var data = JSON.parse(match[0]);
+      renderEval(data);
+      btn.textContent = "✅ 評価完了！もう一度評価する";
+      btn.disabled = false;
+    }catch(e){
+      toast("❌ AI評価に失敗しました","ng");
+      btn.textContent = "✅ 1日を完了してAIに評価してもらう";
+      btn.disabled = false;
+    }
+  }
+
+  function renderEval(d){
+    var el = $("aiEvalResult");
+    var goodHtml = (d.good||[]).map(function(s){return '<span class="ai-eval-tag tag-good">👍 '+s+'</span>';}).join("");
+    var improveHtml = (d.improve||[]).map(function(s){return '<span class="ai-eval-tag tag-warn">⚠️ '+s+'</span>';}).join("");
+    var tomorrowHtml = (d.tomorrow||[]).map(function(s){return '<span class="ai-eval-tag tag-tip">💡 '+s+'</span>';}).join("");
+    el.innerHTML =
+      '<div class="ai-eval-card">' +
+      '<div class="ai-eval-score">'+d.scoreEmoji+' '+d.score+'</div>' +
+      '<div class="ai-eval-title">'+d.headline+'</div>' +
+      '<div class="ai-eval-section"><div class="ai-eval-section-title">✅ 良かった点</div><div>'+goodHtml+'</div></div>' +
+      '<div class="ai-eval-section"><div class="ai-eval-section-title">⚠️ 改善ポイント</div><div>'+improveHtml+'</div></div>' +
+      '<div class="ai-eval-section"><div class="ai-eval-section-title">💡 明日へのアドバイス</div><div>'+tomorrowHtml+'</div></div>' +
+      '</div>';
+    el.style.display = "block";
+    el.scrollIntoView({behavior:"smooth"});
+  }
+
+
   window._setTotals=function(s){totals={cal:s.cal,p:s.p,f:s.f,c:s.c};updateDashboard();};
   window._toast=toast;
 
