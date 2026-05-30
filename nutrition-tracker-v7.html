@@ -988,9 +988,11 @@ function doSearch(q){
       fillForm(hits[idx]);
       el.style.display="none";
       document.getElementById("fSearch").value="";
+                  });
+row.addEventListener("touchstart",function(e){clearTimeout(blurTimer);e.preventDefault();var idx=parseInt(row.dataset.i);fillForm(hits[idx]);el.style.display="none";document.getElementById("fSearch").value="";});
     });
   });
-              row.addEventListener("touchstart",function(e){clearTimeout(blurTimer);e.preventDefault();var idx=parseInt(row.dataset.i);fillForm(hits[idx]);el.style.display="none";document.getElementById("fSearch").value="";});
+              
 }
 
 function fillForm(f){
