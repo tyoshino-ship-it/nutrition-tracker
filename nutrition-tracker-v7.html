@@ -242,8 +242,34 @@ button{cursor:pointer;background:none;border:none;}
 
   <!-- 履歴 -->
   <div class="page" id="page-history">
-    <div class="card"><div class="card-head">📅 履歴</div>
-      <div class="empty"><div class="empty-icon">🚧</div><div class="empty-msg">Phase 6 で実装予定</div></div>
+      <!-- 週切り替え -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <button class="btn btn-s" id="histPrev" type="button">◀ 前の週</button>
+          <div id="histWeekLabel" style="font-size:.95rem;font-weight:700;"></div>
+          <button class="btn btn-s" id="histNext" type="button">次の週 ▶</button>
+        </div>
+        <!-- 週次PFCグラフ（棒グラフ） -->
+        <div class="card-head">📊 週次カロリー推移</div>
+        <div id="histCalChart" style="display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px;"></div>
+        <div id="histDayLabels" style="display:flex;gap:6px;margin-top:4px;padding:0 4px;"></div>
+      </div>
+      <!-- 週次PFCサマリー -->
+      <div class="card">
+        <div class="card-head">🥩 週次PFC平均</div>
+        <div class="pfc-grid" id="histPfcSummary"></div>
+      </div>
+      <!-- 体重推移グラフ -->
+      <div class="card">
+        <div class="card-head">⚖️ 体重推移（直近7日）</div>
+        <div id="histWeightChart" style="position:relative;height:140px;"></div>
+        <div id="histWeightEmpty" style="display:none;" class="empty"><div class="empty-icon">⚖️</div><div class="empty-msg">体組成タブで記録を入力してください</div></div>
+      </div>
+      <!-- 日別詳細リスト -->
+      <div class="card">
+        <div class="card-head">📋 日別詳細</div>
+        <div id="histDayList"></div>
+      </div>
     </div>
   </div>
 </main>
@@ -315,7 +341,7 @@ button{cursor:pointer;background:none;border:none;}
       setConn(null,"確認中…");
       sb.from("user_settings").select("user_key").limit(1).then(function(r){
         if(r.error)throw r.error;
-        setConn(true,"接続済み");connected=true;loadSettingsFromDB();
+        setConn(true,"接続済み");connected=true;window._sb=sb;window._goals=goals;loadSettingsFromDB();
       }).catch(function(){setConn(false,"接続失敗");});
     }catch(e){setConn(false,"初期化エラー");}
   }
@@ -348,7 +374,7 @@ button{cursor:pointer;background:none;border:none;}
     var type=(document.querySelector(".goal-btn.sel")||{}).dataset.goal||"fat_loss";
     var cal=parseFloat($("s_cal").value)||1500,p=parseFloat($("s_pro").value)||130;
     var f=parseFloat($("s_fat").value)||42,c=parseFloat($("s_carb").value)||150;
-    goals={cal:cal,p:p,f:f,c:c,type:type};
+    goals={cal:cal,p:p,f:f,c:c,type:type};window._goals=goals;
     localStorage.setItem("nt_goals",JSON.stringify(goals));
     updateDashboard();updateGoalBadge(type);
     var data={user_key:"default",name:$("s_name").value||"ユーザー",
@@ -1376,6 +1402,94 @@ else{init();}
 
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",buildBodyTab);}
   else{buildBodyTab();}
+})();
+</script>
+<script>(function(){
+var weekOffset=0;
+function getWeekRange(o){var n=new Date(),day=n.getDay(),mon=new Date(n);mon.setDate(n.getDate()-(day===0?6:day-1)+o*7);mon.setHours(0,0,0,0);var sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);return{start:mon,end:sun};}
+function fd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fl(d){return['日','月','火','水','木','金','土'][d.getDay()]+'\n'+d.getDate();}
+function renderCal(days,data){
+  var el=document.getElementById('histCalChart'),lbl=document.getElementById('histDayLabels');
+  if(!el||!lbl)return;
+  var g=window._goals||{cal:1500};
+  var maxC=Math.max(1,g.cal*1.2,Math.max.apply(null,days.map(function(d){return(data[fd(d)]||{}).cal||0;})));
+  el.innerHTML='';lbl.innerHTML='';
+  days.forEach(function(d){
+    var v=data[fd(d)]||{},cal=v.cal||0,pct=Math.min(100,Math.round(cal/maxC*100));
+    var isT=fd(d)===fd(new Date());
+    var col=cal>=g.cal*0.9&&cal<=g.cal*1.1?'var(--color-success)':cal>g.cal*1.1?'var(--color-error)':'var(--color-primary)';
+    var bar=document.createElement('div');
+    bar.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;';
+    bar.innerHTML='<div style="font-size:.62rem;color:var(--color-text-muted);">'+(cal>0?Math.round(cal):'')+'</div><div style="width:100%;border-radius:4px 4px 0 0;background:'+(cal>0?col:'var(--color-border)')+';height:'+pct+'%;min-height:'+(cal>0?'4px':'2px')+';"></div>';
+    el.appendChild(bar);
+    var l=document.createElement('div');
+    l.style.cssText='flex:1;text-align:center;font-size:.65rem;color:'+(isT?'var(--color-primary)':'var(--color-text-muted)')+';font-weight:'+(isT?700:400)+';white-space:pre;line-height:1.3;';
+    l.textContent=fl(d);lbl.appendChild(l);
+  });
+}
+function renderPfc(days,data){
+  var el=document.getElementById('histPfcSummary');if(!el)return;
+  var t={cal:0,p:0,f:0,c:0,n:0};
+  days.forEach(function(d){var v=data[fd(d)];if(v&&v.cal>0){t.cal+=v.cal;t.p+=v.p;t.f+=v.f;t.c+=v.c;t.n++;}});
+  var n=t.n||1,g=window._goals||{cal:1500,p:130,f:42,c:150};
+  function box(cls,lbl,val,goal,unit){return '<div class="pfc-box '+cls+'"><div class="pfc-lbl">'+lbl+'</div><div class="pfc-val">'+val+'<small style="font-size:.55em">'+unit+'</small></div><div class="pfc-sub">目標 '+goal+unit+'</div><div class="bar-wrap"><div class="bar" style="width:'+Math.min(100,Math.round(val/goal*100))+'%"></div></div></div>';}
+  el.innerHTML=box('pfc-cal','平均カロリー',Math.round(t.cal/n),g.cal,'kcal')+box('pfc-p','平均タンパク質',(t.p/n).toFixed(1),g.p,'g')+box('pfc-f','平均脂質',(t.f/n).toFixed(1),g.f,'g')+box('pfc-c','平均炭水化物',(t.c/n).toFixed(1),g.c,'g');
+}
+function renderWeight(entries){
+  var el=document.getElementById('histWeightChart'),emp=document.getElementById('histWeightEmpty');
+  if(!el)return;
+  var rows=entries.filter(function(e){return e.weight_kg;}).slice(-7);
+  if(!rows.length){el.style.display='none';if(emp)emp.style.display='block';return;}
+  if(emp)emp.style.display='none';el.style.display='block';
+  var ws=rows.map(function(e){return parseFloat(e.weight_kg);}),minW=Math.min.apply(null,ws)-0.5,maxW=Math.max.apply(null,ws)+0.5,range=maxW-minW||1;
+  var W=el.offsetWidth||300,H=120;
+  var pts=rows.map(function(e,i){return{x:rows.length===1?W/2:Math.round(i/(rows.length-1)*(W-40)+20),y:Math.round(H-((parseFloat(e.weight_kg)-minW)/range*(H-30))-10),w:parseFloat(e.weight_kg),d:(e.logged_date||'').slice(5).replace('-','/')};});
+  var path=pts.map(function(p,i){return(i===0?'M':'L')+p.x+' '+p.y;}).join(' ');
+  var dots=pts.map(function(p){return 'ircle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="var(--color-primary)" stroke="var(--color-surface)" stroke-width="2"/><text x="'+p.x+'" y="'+(p.y-8)+'" text-anchor="middle" font-size="9" font-weight="700" fill="var(--color-primary)">'+p.w+'</text><text x="'+p.x+'" y="'+(H+14)+'" text-anchor="middle" font-size="9" fill="var(--color-text-muted)">'+p.d+'</text>';}).join('');
+  el.innerHTML='<svg width="100%" height="'+(H+20)+'" viewBox="0 0 '+W+' '+(H+20)+'"><path d="'+path+'" stroke="var(--color-primary)" stroke-width="2" fill="none"/>'+dots+'</svg>';
+}
+function renderDays(days,data){
+  var el=document.getElementById('histDayList');if(!el)return;
+  var g=window._goals||{cal:1500},dn=['日','月','火','水','木','金','土'],h='';
+  days.slice().reverse().forEach(function(d){
+    var v=data[fd(d)]||{},cal=v.cal?Math.round(v.cal):0;
+    var pct=Math.min(100,Math.round(cal/g.cal*100));
+    var col=cal>=g.cal*0.9&&cal<=g.cal*1.1?'var(--color-success)':cal>g.cal*1.1?'var(--color-error)':'var(--color-text-muted)';
+    h+='<div style="display:flex;align-items:center;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--color-divider);">'+
+      '<div style="width:36px;text-align:center;font-size:.75rem;font-weight:700;color:var(--color-text-muted);">'+(d.getMonth()+1)+'/'+d.getDate()+'<br><span style="color:var(--color-primary)">'+dn[d.getDay()]+'</span></div>'+
+      '<div style="flex:1;"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:3px;"><span style="font-weight:600;color:'+col+';">'+(cal?cal+'kcal':'記録なし')+'</span>'+(cal?'<span style="font-size:.72rem;color:var(--color-text-faint);">P:'+(v.p||0).toFixed(1)+'g F:'+(v.f||0).toFixed(1)+'g C:'+(v.c||0).toFixed(1)+'g</span>':'')+
+      '</div>'+(cal?'<div style="height:3px;background:var(--color-border);border-radius:9999px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:9999px;"></div></div>':'')+
+      '</div></div>';
+  });
+  el.innerHTML=h||'<div class="empty"><div class="empty-icon">📭</div><div class="empty-msg">この週の記録はありません</div></div>';
+}
+async function load(){
+  var sb=window._sb,range=getWeekRange(weekOffset),days=[],g=window._goals||{cal:1500};
+  for(var i=0;i<7;i++){var dd=new Date(range.start);dd.setDate(range.start.getDate()+i);days.push(dd);}
+  var lbl=document.getElementById('histWeekLabel');
+  if(lbl)lbl.textContent=fd(range.start).slice(5).replace('-','/')+'〜'+fd(range.end).slice(5).replace('-','/');
+  var data={};
+  if(sb){
+    try{
+      var r=await sb.from('meal_logs').select('logged_date,total_calories,total_protein_g,total_fat_g,total_carb_g').gte('logged_date',fd(range.start)).lte('logged_date',fd(range.end));
+      if(r.data)r.data.forEach(function(row){data[row.logged_date]={cal:row.total_calories||0,p:row.total_protein_g||0,f:row.total_fat_g||0,c:row.total_carb_g||0};});
+    }catch(e){}
+    try{
+      var wr=await sb.from('body_compositions').select('logged_date,weight_kg').order('logged_date',{ascending:true}).limit(30);
+      renderWeight(wr.data||[]);
+    }catch(e){renderWeight([]);}
+  }else{renderWeight([]);}
+  renderCal(days,data);renderPfc(days,data);renderDays(days,data);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){if(t.dataset.page==='history')setTimeout(load,100);});});
+  var prev=document.getElementById('histPrev'),next=document.getElementById('histNext');
+  if(prev)prev.addEventListener('click',function(){weekOffset--;load();});
+  if(next)next.addEventListener('click',function(){if(weekOffset<0){weekOffset++;load();}});
+  var timer=setInterval(function(){if(window._sb!==undefined){clearInterval(timer);load();}},300);
+  setTimeout(function(){clearInterval(timer);load();},5000);
+});
 })();
 </script>
 </body>
