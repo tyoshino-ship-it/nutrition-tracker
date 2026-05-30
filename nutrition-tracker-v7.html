@@ -1201,6 +1201,7 @@ function init(){try{var _cdb=JSON.parse(localStorage.getItem("nt_custom_db")||"[
     if(!sb)return;
     var d=new Date().toISOString().slice(0,10);
     sb.from("meal_logs").select("id,meal_type").eq("user_key","default").eq("log_date",d).then(function(r){
+            renderCustomFoods();
       if(r.error||!r.data||!r.data.length)return;
       var logIds=r.data.map(function(x){return x.id;});
       var logMap={};r.data.forEach(function(x){logMap[x.id]=x.meal_type;});
