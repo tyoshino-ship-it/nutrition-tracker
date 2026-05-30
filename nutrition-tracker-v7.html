@@ -990,7 +990,7 @@ function fillForm(f){
     document.getElementById("fC").value=f.c;
     amtEl._base=f;
     amtEl.oninput=function(){
-      if(!amtEl._base){var _prev=amtEl._prevAmt||(parseFloat(amtEl.value)||1);var _cur=parseFloat(amtEl.value)||1;if(_prev>0&&_cur!==_prev){var _r=_cur/_prev;var _calEl=document.getElementById("fCal"),_pEl=document.getElementById("fP"),_fEl=document.getElementById("fF"),_cEl=document.getElementById("fC");_calEl.value=(parseFloat(_calEl.value)||0)*_r;_pEl.value=((parseFloat(_pEl.value)||0)*_r).toFixed(1);_fEl.value=((parseFloat(_fEl.value)||0)*_r).toFixed(1);_cEl.value=((parseFloat(_cEl.value)||0)*_r).toFixed(1);}amtEl._prevAmt=_cur;return;}
+      if(!amtEl._base){var _amt=parseFloat(amtEl.value)||0;var _b=amtEl._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}return;}=amtEl._prevAmt||(parseFloat(amtEl.value)||1);var _cur=parseFloat(amtEl.value)||1;if(_prev>0&&_cur!==_prev){var _r=_cur/_prev;var _calEl=document.getElementById("fCal"),_pEl=document.getElementById("fP"),_fEl=document.getElementById("fF"),_cEl=document.getElementById("fC");_calEl.value=(parseFloat(_calEl.value)||0)*_r;_pEl.value=((parseFloat(_pEl.value)||0)*_r).toFixed(1);_fEl.value=((parseFloat(_fEl.value)||0)*_r).toFixed(1);_cEl.value=((parseFloat(_cEl.value)||0)*_r).toFixed(1);}amtEl._prevAmt=_cur;return;}
       var r=(parseFloat(amtEl.value)||0)/100,b=amtEl._base;
       document.getElementById("fCal").value=(b.cal*r).toFixed(1);
       document.getElementById("fP").value=(b.p*r).toFixed(1);
