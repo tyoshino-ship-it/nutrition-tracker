@@ -16,7 +16,8 @@
 --shadow-sm:0 1px 2px rgba(0,0,0,.06);--shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 12px 32px rgba(0,0,0,.12);
 --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
 --font-body:"Satoshi",sans-serif;
-fix: 手動入力時に量を変更するとPFCが比例計算されるよう修正（onfocusで_prevAmtを保存）}
+--trans:180ms cubic-bezier(.16,1,.3,1);
+}
 [data-theme="dark"]{
 --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
 --color-surface-offset:#252422;--color-border:#393836;--color-divider:#262523;
@@ -353,8 +354,7 @@ button{cursor:pointer;background:none;border:none;}
     var u=localStorage.getItem("nt_url")||"https://ufbpqjacybhdjisnehsm.supabase.co",k=localStorage.getItem("nt_key")||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmYnBxamFjeWJoZGppc25laHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDY1NTgsImV4cCI6MjA5NTYyMjU1OH0.hdqjLtCk1yiboYGsNEznBK-k88dUX24gHFppMatzCg8";
     if(u&&k)initSB(u,k);else setConn(false,"API未設定");
 
-    document.getElementById("fAmt").addEventListener("input",function(){var _b=this._manualBase;if(_b&&_b.baseAmt>0){var _r=(parseFloat(this.value)||0)/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}});["fCal","fP","fF","fC"].forEach(function(id){document.getElementById(id).addEventListener("input",function(){var _a=document.getElementById("fAmt");_a._manualBase={baseAmt:parseFloat(_a.value)||100,cal:parseFloat(document.getElementById("fCal").value)||0,p:parseFloat(document.getElementById("fP").value)||0,f:parseFloat(document.getElementById("fF").value)||0,c:parseFloat(document.getElementById("fC").value)||0};});});$("btnSaveSettings").addEventListener("click",saveSettings);
-document.getElementById("fCal").addEventListener("input",function(){var _cal=parseFloat(this.value)||0;var _sCal=parseFloat(document.getElementById("s_cal").value)||0;var _sPro=parseFloat(document.getElementById("s_pro").value)||0;var _sFat=parseFloat(document.getElementById("s_fat").value)||0;var _sCarb=parseFloat(document.getElementById("s_carb").value)||0;if(_sCal>0&&(_sPro>0||_sFat>0||_sCarb>0)){var _r=_cal/_sCal;document.getElementById("fP").value=(_sPro*_r).toFixed(1);document.getElementById("fF").value=(_sFat*_r).toFixed(1);document.getElementById("fC").value=(_sCarb*_r).toFixed(1);}});
+    $("btnSaveSettings").addEventListener("click",saveSettings);
     $("btnAutoCalc").addEventListener("click",autoCalc);
     $("btnAiOptimize").addEventListener("click",aiOptimizePfc);
     $("btnSaveCfg").addEventListener("click",saveCfg);
@@ -580,8 +580,6 @@ document.getElementById("fCal").addEventListener("input",function(){var _cal=par
       toast("✅ AI最適化完了："+d.reason,"ok");
     }catch(e){toast("❌ AI最適化に失敗しました","ng");}
     btn.disabled=false;btn.textContent="🤖 AIがPFCを最適化";
-
-
   }
 
   async function runDayComplete(){
@@ -663,7 +661,7 @@ document.getElementById("fCal").addEventListener("input",function(){var _cal=par
   window._setTotals=function(s){totals={cal:s.cal,p:s.p,f:s.f,c:s.c};updateDashboard();};
   window._toast=toast;
 
-  document.addEventListener("DOMContentLoaded",init);document.addEventListener("DOMContentLoaded",function(){var amtEl3=document.getElementById("fAmt");if(amtEl3){amtEl3.onfocus=function(){if(!amtEl3._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl3.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl3._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl3.oninput=function(){var _amt=parseFloat(amtEl3.value)||0,_b=amtEl3._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}};};});;
+  document.addEventListener("DOMContentLoaded",init);
 })();
 </script>
 
@@ -992,8 +990,8 @@ function fillForm(f){
     document.getElementById("fF").value=f.f;
     document.getElementById("fC").value=f.c;
     amtEl._base=f;
-    amtEl.onfocus=function(){if(!amtEl._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl.oninput=function(){
-      if(!amtEl._base){var _amt=parseFloat(amtEl.value)||0;var _b=amtEl._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}return;}=amtEl._prevAmt||(parseFloat(amtEl.value)||1);var _cur=parseFloat(amtEl.value)||1;if(_prev>0&&_cur!==_prev){var _r=_cur/_prev;var _calEl=document.getElementById("fCal"),_pEl=document.getElementById("fP"),_fEl=document.getElementById("fF"),_cEl=document.getElementById("fC");_calEl.value=(parseFloat(_calEl.value)||0)*_r;_pEl.value=((parseFloat(_pEl.value)||0)*_r).toFixed(1);_fEl.value=((parseFloat(_fEl.value)||0)*_r).toFixed(1);_cEl.value=((parseFloat(_cEl.value)||0)*_r).toFixed(1);}amtEl._prevAmt=_cur;return;}
+    amtEl.oninput=function(){
+      if(!amtEl._base)return;
       var r=(parseFloat(amtEl.value)||0)/100,b=amtEl._base;
       document.getElementById("fCal").value=(b.cal*r).toFixed(1);
       document.getElementById("fP").value=(b.p*r).toFixed(1);
@@ -1055,7 +1053,7 @@ function saveCustomFood(){
   if(arr.find(function(x){return x.name===name;})){if(window._toast)window._toast("既に保存済みです","info");return;}
   arr.unshift(food);localStorage.setItem("nt_custom_db",JSON.stringify(arr));
   if(window._toast)window._toast("⭐「"+name+"」をカスタム食品に保存しました","ok");
-  var sb=window._sb;if(sb){
+  if(sb){
     sb.from("food_master").select("id").eq("name",name).eq("is_user_custom",true).then(function(r){
       if(r.data&&r.data.length>0){return;}
       sb.from("food_master").insert({
@@ -1074,9 +1072,9 @@ function saveCustomFood(){
 
 function clearForm(){
   ["fName","fAmt","fCal","fP","fF","fC"].forEach(function(id){
-    var el=document.getElementById(id);if(el){el.value="";el._base=null;el._manualBase=null;el.oninput=null;}
+    var el=document.getElementById(id);if(el){el.value="";el._base=null;el.oninput=null;}
   });
-  var u=document.getElementById("fUnit");if(u)u.value="g";var amtEl2=document.getElementById("fAmt");if(amtEl2){amtEl2.onfocus=function(){if(!amtEl2._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl2.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl2._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl2.oninput=function(){var _amt=parseFloat(amtEl2.value)||0,_b=amtEl2._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);};};}
+  var u=document.getElementById("fUnit");if(u)u.value="g";
 }
 
 function renderLog(){
@@ -1182,9 +1180,9 @@ function init(){
     });
   },1500);
 }
-if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);document.addEventListener("DOMContentLoaded",function(){var amtEl3=document.getElementById("fAmt");if(amtEl3){amtEl3.onfocus=function(){if(!amtEl3._base){var _c=parseFloat(document.getElementById("fCal").value)||0,_p=parseFloat(document.getElementById("fP").value)||0,_f=parseFloat(document.getElementById("fF").value)||0,_cc=parseFloat(document.getElementById("fC").value)||0,_a=parseFloat(amtEl3.value)||0;if(_a>0&&(_c>0||_p>0||_f>0||_cc>0)){amtEl3._manualBase={baseAmt:_a,cal:_c,p:_p,f:_f,c:_cc};}}};amtEl3.oninput=function(){var _amt=parseFloat(amtEl3.value)||0,_b=amtEl3._manualBase;if(_b&&_b.baseAmt>0){var _r=_amt/_b.baseAmt;document.getElementById("fCal").value=(_b.cal*_r).toFixed(1);document.getElementById("fP").value=(_b.p*_r).toFixed(1);document.getElementById("fF").value=(_b.f*_r).toFixed(1);document.getElementById("fC").value=(_b.c*_r).toFixed(1);}};};});;}
+if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);}
 else{init();}
-});
+})();
 </script>
 <!-- ===== 夕食提案スクリプト ===== -->
 <script>
