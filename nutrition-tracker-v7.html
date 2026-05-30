@@ -217,6 +217,7 @@ button{cursor:pointer;background:none;border:none;}
       </div>
       <div class="btn-row">
         <button class="btn btn-s" type="button" id="btnAutoCalc">🔄 プロフィールから自動計算</button>
+          <button class="btn btn-s" type="button" id="btnAiOptimize" style="background:var(--color-primary-highlight);color:var(--color-primary);border-color:var(--color-primary);">🤖 AIがPFCを最適化</button>
         <button class="btn btn-p" type="button" id="btnSaveSettings">💾 設定を保存</button>
       </div>
     </div>
@@ -296,6 +297,7 @@ button{cursor:pointer;background:none;border:none;}
 
     $("btnSaveSettings").addEventListener("click",saveSettings);
     $("btnAutoCalc").addEventListener("click",autoCalc);
+    $("btnAiOptimize").addEventListener("click",aiOptimizePfc);
     $("btnSaveCfg").addEventListener("click",saveCfg);
     $("btnTestConn").addEventListener("click",testConn);
     $("themeBtn").addEventListener("click",toggleTheme);
@@ -304,10 +306,22 @@ button{cursor:pointer;background:none;border:none;}
     document.querySelectorAll(".tab").forEach(function(t){
       t.addEventListener("click",function(){switchTab(t.dataset.page);});
     });
+    var GOAL_PRESETS={
+      "fat_loss":{cal:1550,p:140,f:52,c:130},
+      "muscle_gain":{cal:1750,p:150,f:39,c:200}
+    };
     document.querySelectorAll(".goal-btn").forEach(function(b){
       b.addEventListener("click",function(){
         document.querySelectorAll(".goal-btn").forEach(function(x){x.classList.remove("sel");});
         b.classList.add("sel");
+        var type=b.dataset.goal;
+        if(type==="maintain"){
+          autoCalc();
+        } else if(GOAL_PRESETS[type]){
+          var p=GOAL_PRESETS[type];
+          $("s_cal").value=p.cal;$("s_pro").value=p.p;$("s_fat").value=p.f;$("s_carb").value=p.c;
+          toast("✅ "+b.textContent.trim()+"のPFCを設定しました","info");
+        }
       });
     });
   }
@@ -453,6 +467,34 @@ button{cursor:pointer;background:none;border:none;}
 
   // グローバル公開
   
+
+  async function aiOptimizePfc(){
+    var gemKey=localStorage.getItem("nt_gem");
+    if(!gemKey){toast("⚠️ Gemini APIキーを設定してください","ng");return;}
+    var age=parseInt($("s_age").value),h=parseFloat($("s_height").value),w=parseFloat($("s_weight").value);
+    var bf=parseFloat($("s_bf").value),tbf=parseFloat($("s_tbf").value);
+    var days=parseInt($("s_tdays").value)||4;
+    var type=(document.querySelector(".goal-btn.sel")||{}).dataset||{};
+    var goalType=type.goal||"fat_loss";
+    if(!age||!h||!w){toast("⚠️ プロフィール（年齢・身長・体重）を入力してください","ng");return;}
+    var btn=$("btnAiOptimize");
+    btn.disabled=true;btn.textContent="🤖 AI分析中…";
+    var leanMass=w*(1-(bf||20)/100);
+    var goalLabel={"fat_loss":"脂肪燃焼","muscle_gain":"筋肉増強","maintain":"体型維持"}[goalType]||goalType;
+    var prompt="あなたはスポーツ栄養士です。以下のデータをもとに、"+goalLabel+"に最適なPFCを日本語でJSON形式のみで回答してください（余分なテキスト不要）\n\n【プロフィール】年齢:"+age+"歳 / 身長:"+h+"cm / 体重:"+w+"kg / 体脂肪率:"+(bf||"不明")+"% / 目標体脂肪率:"+(tbf||"不明")+"% / 除脂肪体重:"+leanMass.toFixed(1)+"kg / 週トレーニング日数:"+days+"日\n【目標】"+goalLabel+"\n\n以下のJSON形式のみで回答:\n{\n  \"calories\": 数値,\n  \"protein_g\": 数値,\n  \"fat_g\": 数値,\n  \"carb_g\": 数値,\n  \"reason\": \"設定理由を50文字以内で\"\n}";
+    try{
+      var res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+gemKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+      var json=await res.json();
+      var raw=json.candidates[0].content.parts[0].text;
+      var match=raw.match(/\{[\s\S]*\}/);
+      if(!match)throw new Error("parse error");
+      var d=JSON.parse(match[0]);
+      $("s_cal").value=d.calories;$("s_pro").value=d.protein_g;$("s_fat").value=d.fat_g;$("s_carb").value=d.carb_g;
+      toast("✅ AI最適化完了："+d.reason,"ok");
+    }catch(e){toast("❌ AI最適化に失敗しました","ng");}
+    btn.disabled=false;btn.textContent="🤖 AIがPFCを最適化";
+  }
+
   async function runDayComplete(){
     var gemKey = localStorage.getItem("nt_gem");
     if(!gemKey){
