@@ -1155,7 +1155,7 @@ function load(){
 }
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 
-function init(){
+function init(){try{var _cdb=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");var _changed=false;_cdb=_cdb.map(function(x){if(x.fixed!==false){x.fixed=false;_changed=true;}if(!x.amt){x.amt=100;_changed=true;}return x;});if(_changed){localStorage.setItem("nt_custom_db",JSON.stringify(_cdb));}}catch(e){}
   load();buildUI();updateTotals();renderDashLog();
   setTimeout(function(){
     if(!sb)return;
