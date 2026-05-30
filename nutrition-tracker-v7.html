@@ -19,6 +19,7 @@
 --trans:180ms cubic-bezier(.16,1,.3,1);
 }
 [data-theme="dark"]{
+  
 --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
 --color-surface-offset:#252422;--color-border:#393836;--color-divider:#262523;
 --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
@@ -955,11 +956,12 @@ function doSearch(q){
       "<div style='font-size:.875rem;font-weight:600;'>"+esc(f.name)+"</div>"+
       "<div style='font-size:.7rem;color:var(--color-text-muted);display:flex;align-items:center;gap:.4rem;'>"+
       "<span style='color:"+col+";font-weight:700;'>"+esc(f.category)+"</span> | "+
-      (f.fixed?"1"+f.unit+"あたり ":"100"+f.unit+"あたり ")+f.cal+"kcal P:"+f.p+"g F:"+f.f+"g C:"+f.c+"g"+
+
+      (f.fixed?"1"+f.unit+"あたり":(f.baseAmt||100)+f.unit+"あたり ")+f.cal+"kcal P:"+f.p+"g F:"+f.f+"g C:"+f.c+"g"+
       "</div></div>";
   }).join("");
   el.style.display="block";
-  el.querySelectorAll(".sri").forEach(function(row){
+
     row.addEventListener("mouseover",function(){this.style.background="var(--color-surface-offset)";});
     row.addEventListener("mouseout",function(){this.style.background="";});
     row.addEventListener("mousedown",function(e){
@@ -984,15 +986,15 @@ function fillForm(f){
     document.getElementById("fC").value=f.c;
     amtEl._base=null;amtEl.oninput=null;
   }else{
-    amtEl.value=100;
+  
     document.getElementById("fCal").value=f.cal;
     document.getElementById("fP").value=f.p;
     document.getElementById("fF").value=f.f;
-    document.getElementById("fC").value=f.c;
+    amtEl.value=f.baseAmt||100;
     amtEl._base=f;
     amtEl.oninput=function(){
       if(!amtEl._base)return;
-      var r=(parseFloat(amtEl.value)||0)/100,b=amtEl._base;
+      var b=amtEl._base,r=(parseFloat(amtEl.value)||0)/(b&&b.baseAmt||100);
       document.getElementById("fCal").value=(b.cal*r).toFixed(1);
       document.getElementById("fP").value=(b.p*r).toFixed(1);
       document.getElementById("fF").value=(b.f*r).toFixed(1);
@@ -1047,8 +1049,9 @@ function saveCustomFood(){
   var f=parseFloat(document.getElementById("fF").value)||0;
   var c=parseFloat(document.getElementById("fC").value)||0;
   var unit=document.getElementById("fUnit").value;
-  if(!name){if(window._toast)window._toast("食品名を入力してください","ng");return;}
-  var food={name:name,cal:cal,p:p,f:f,c:c,unit:unit,category:"カスタム",fixed:false};
+  var amt=parseFloat(document.getElementById("fAmt").value)||100;
+if(!name){if(window._toast)window._toast("食品名を入力してください","ng");return;}
+  var food={name:name,cal:cal,p:p,f:f,c:c,unit:unit,category:"カスタム",fixed:false,baseAmt:amt};
   var arr=[];try{arr=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
   if(arr.find(function(x){return x.name===name;})){if(window._toast)window._toast("既に保存済みです","info");return;}
   arr.unshift(food);localStorage.setItem("nt_custom_db",JSON.stringify(arr));
