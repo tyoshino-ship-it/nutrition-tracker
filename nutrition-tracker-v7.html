@@ -1053,7 +1053,7 @@ function saveCustomFood(){
   if(arr.find(function(x){return x.name===name;})){if(window._toast)window._toast("既に保存済みです","info");return;}
   arr.unshift(food);localStorage.setItem("nt_custom_db",JSON.stringify(arr));
   if(window._toast)window._toast("⭐「"+name+"」をカスタム食品に保存しました","ok");
-  if(sb){
+  var sb=window._sb;if(sb){
     sb.from("food_master").select("id").eq("name",name).eq("is_user_custom",true).then(function(r){
       if(r.data&&r.data.length>0){return;}
       sb.from("food_master").insert({
