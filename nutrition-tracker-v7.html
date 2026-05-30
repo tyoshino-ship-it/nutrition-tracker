@@ -960,7 +960,7 @@ function doSearch(q){
   var el=document.getElementById("fResults");
   if(!q){el.style.display="none";return;}
   var customDB=[];try{customDB=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
-  var allDB=customDB.concat(SEVEN_DB,LAWSON_DB,FOOD_DB);
+  var allDB=customDB.concat(SEVEN_DB,LAWSON_DB,FAMIMA_DB,STARBUCKS_DB,FOOD_DB);
       var hits=allDB.filter(function(f){return f.name.indexOf(q)!==-1||f.category.indexOf(q)!==-1;}).slice(0,12);
   if(!hits.length){
     el.innerHTML="<div style='padding:.75rem 1rem;font-size:.85rem;color:var(--color-text-muted);'>見つかりません。手動で入力してください。</div>";
