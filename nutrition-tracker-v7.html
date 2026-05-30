@@ -424,7 +424,7 @@ button{cursor:pointer;background:none;border:none;}
     initSB(u,k);
   }
   function loadConfig(){
-    var u=localStorage.getItem("nt_url")||"https://ufbpqjacybhdjisnehsm.supabase.co",k=localStorage.getItem("nt_key")||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmYnBxamFjeWJoZGppc25laHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDY1NTgsImV4cCI6MjA5NTYyMjU1OH0.hdqjLtCk1yiboYGsNEznBK-k88dUX24gHFppMatzCg8",g=localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||";
+    var u=localStorage.getItem("nt_url")||"https://ufbpqjacybhdjisnehsm.supabase.co",k=localStorage.getItem("nt_key")||"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmYnBxamFjeWJoZGppc25laHNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNDY1NTgsImV4cCI6MjA5NTYyMjU1OH0.hdqjLtCk1yiboYGsNEznBK-k88dUX24gHFppMatzCg8",g=localStorage.getItem("nt_gem_key)||";
     if(u)$("cfg_url").value=u;if(k)$("cfg_key").value=k;if(g)$("cfg_gem").value=g;
   }
   function saveCfg(){
@@ -556,7 +556,7 @@ button{cursor:pointer;background:none;border:none;}
   
 
   async function aiOptimizePfc(){
-    var gemKey=localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||";
+    var gemKey=localStorage.getItem("nt_gem_key)||";
     if(!gemKey){toast("⚠️ Gemini APIキーを設定してください","ng");return;}
     var age=parseInt($("s_age").value),h=parseFloat($("s_height").value),w=parseFloat($("s_weight").value);
     var bf=parseFloat($("s_bf").value),tbf=parseFloat($("s_tbf").value);
@@ -583,7 +583,7 @@ button{cursor:pointer;background:none;border:none;}
   }
 
   async function runDayComplete(){
-    var gemKey = localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||";
+    var gemKey = localStorage.getItem("nt_gem_key)||";
     if(!gemKey){
       toast("⚠️ Gemini APIキーを目標設定タブで設定してください","ng");
       return;
@@ -1206,7 +1206,7 @@ else{init();}
   }
 
   function suggestDinner(){
-    var gemKey=localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||"||"";
+    var gemKey=localStorage.getItem("nt_gem_key)||"||"";
     var g=getGoals(),t=getTotals();
     var rem={cal:Math.max(0,g.cal-t.cal),p:Math.max(0,g.p-t.p),f:Math.max(0,g.f-t.f),c:Math.max(0,g.c-t.c)};
     var area=document.getElementById("suggestArea");
@@ -1407,7 +1407,7 @@ else{init();}
 
     document.getElementById("btnReadImg").addEventListener("click",function(){
       if(!currentImgB64){if(window._toast)window._toast("先に画像を選択してください","ng");return;}
-      var gemKey=localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||"||"";
+      var gemKey=localStorage.getItem("nt_gem_key)||"||"";
       if(!gemKey){if(window._toast)window._toast("Gemini APIキーを設定してください","ng");return;}
       if(window._toast)window._toast("🤖 AIが読み取り中…","info");
       var prompt="この画像はオムロンの体組成計の画面です。以下の数値をJSON形式で抽出してください。数値が読み取れない場合はnullにしてください。\n{\"weight\":体重kg,\"body_fat_pct\":体脂肪率%,\"muscle_mass\":筋肉量kg,\"visceral_fat\":内臓脂肪レベル,\"bmr\":基礎代謝kcal,\"bmi\":BMI,\"body_age\":体年齢}";
@@ -1494,7 +1494,7 @@ else{init();}
     var weight=parseFloat(document.getElementById("b_weight").value);
     if(!weight){if(window._toast)window._toast("体重を入力してください","ng");return;}
     var bf=parseFloat(document.getElementById("b_bf").value)||null;
-    var gemKey=localStorage.getItem("ntAIzaSyB5jABKb6-vB-GnxLvbdpzP-Hm-vEMPWMs"_gem")||"||"";
+    var gemKey=localStorage.getItem("nt_gem_key)||"||"";
     var card=document.getElementById("bodyAICard");
     var area=document.getElementById("bodyAIArea");
     card.style.display="block";
