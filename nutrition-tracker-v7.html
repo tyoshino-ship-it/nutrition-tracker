@@ -432,7 +432,7 @@ button{cursor:pointer;background:none;border:none;}
     var u=$("cfg_url").value.trim(),k=$("cfg_key").value.trim(),g=$("cfg_gem").value.trim();
     if(!u||!k){toast("URLとKeyを入力してください","ng");return;}
     localStorage.setItem("nt_url",u);localStorage.setItem("nt_key",k);
-    if(g)localStorage.setItem("nt_gem",g);
+    if(g)localStorage.setItem("nt_gem_key",g);
     toast("接続設定を保存しました","info");initSB(u,k);
   }
   function loadLocalGoals(){
