@@ -905,12 +905,10 @@ function buildUI(){
     '    </div>'+
     '  </div>'+
     '</div>'+
-    '<div class="card"><div class="card-head">📋 本日の食事ログ</div><div id="logList"></div></div>';
+    '<div class="card"><div class="card-head">📋 本日の食事ログ</div><div id="logList"></div></div>'+
+          '<div class="card"><div class="card-head">⭐ 保存済みカスタム食品</div><div id="customFoodList"></div></div>';
 
   var wrap=document.getElementById("mtBtns");
-  MEAL_TYPES.forEach(function(mt){
-              '<div class="card"><div class="card-head">⭐ 保存済みカスタム食品</div><div id="customFoodList"></div></div>'+
-    var b=document.createElement("button");
     b.type="button";b.dataset.mt=mt.id;b.textContent=mt.label;
     b.style.cssText="padding:.5rem .9rem;border-radius:9999px;font-size:.82rem;font-weight:600;cursor:pointer;border:2px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);transition:all 180ms;min-height:44px;";
     b.addEventListener("click",function(){
