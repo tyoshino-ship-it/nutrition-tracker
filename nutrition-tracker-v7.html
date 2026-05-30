@@ -909,6 +909,7 @@ function buildUI(){
 
   var wrap=document.getElementById("mtBtns");
   MEAL_TYPES.forEach(function(mt){
+              '<div class="card"><div class="card-head">⭐ 保存済みカスタム食品</div><div id="customFoodList"></div></div>'+
     var b=document.createElement("button");
     b.type="button";b.dataset.mt=mt.id;b.textContent=mt.label;
     b.style.cssText="padding:.5rem .9rem;border-radius:9999px;font-size:.82rem;font-weight:600;cursor:pointer;border:2px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);transition:all 180ms;min-height:44px;";
@@ -935,7 +936,9 @@ function buildUI(){
   });
   document.getElementById("btnAdd").addEventListener("click",addFood);
   document.getElementById("btnClr").addEventListener("click",clearForm);
-  document.getElementById("btnSaveCustom").addEventListener("click",saveCustomFood);
+  document.getElementById("btnSaveCustom").addEventListener("click",1047
+                                                           );
+        renderCustomFoods();
 }
 
 var CAT_COLOR={"7-Eleven":"#007234","Lawson":"#0068b7","FamilyMart":"#007844","Starbucks":"#00704a","カスタム":"var(--color-error)"};
@@ -1044,7 +1047,8 @@ function addFood(){
   }
 }
 
-function saveCustomFood(){
+function 908
+  (){
   var name=document.getElementById("fName").value.trim();
   var cal=parseFloat(document.getElementById("fCal").value)||0;
   var p=parseFloat(document.getElementById("fP").value)||0;
@@ -1058,6 +1062,7 @@ if(!name){if(window._toast)window._toast("食品名を入力してください",
   if(arr.find(function(x){return x.name===name;})){if(window._toast)window._toast("既に保存済みです","info");return;}
   arr.unshift(food);localStorage.setItem("nt_custom_db",JSON.stringify(arr));
   if(window._toast)window._toast("⭐「"+name+"」をカスタム食品に保存しました","ok");
+          renderCustomFoods();
   if(sb){
     sb.from("food_master").select("id").eq("name",name).eq("is_user_custom",true).then(function(r){
       if(r.data&&r.data.length>0){return;}
@@ -1074,6 +1079,36 @@ if(!name){if(window._toast)window._toast("食品名を入力してください",
     });
   }
 }
+
+      function renderCustomFoods(){
+      var el=document.getElementById("customFoodList");
+      if(!el)return;
+      var arr=[];
+      try{arr=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
+      if(!arr.length){
+        el.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-msg">保存済みの食品はありません</div></div>';
+        return;
+      }
+      el.innerHTML=arr.map(function(f,i){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem .75rem;border-bottom:1px solid var(--color-divider);">'
+          +'<div>'
+          +'<div style="font-weight:600;font-size:.9rem;">'+esc(f.name)+'</div>'
+          +'<div style="font-size:.75rem;color:var(--color-text-muted);">'+(f.baseAmt||100)+f.unit+' → '+f.cal+'kcal P:'+f.p+'g F:'+f.f+'g C:'+f.c+'g</div>'
+          +'</div>'
+          +'<button onclick="deleteCustomFood('+i+')" style="padding:.35rem .75rem;border-radius:var(--radius-md);background:var(--color-error);color:#fff;font-size:.8rem;font-weight:600;border:none;cursor:pointer;">削除</button>'
+          +'</div>';
+      }).join("");
+    }
+    window.deleteCustomFood=function(idx){
+      var arr=[];
+      try{arr=JSON.parse(localStorage.getItem("nt_custom_db")||"[]");}catch(e){}
+      var name=arr[idx]?arr[idx].name:"";
+      arr.splice(idx,1);
+      localStorage.setItem("nt_custom_db",JSON.stringify(arr));
+      renderCustomFoods();
+      if(window._toast)window._toast("🗑️ "+name+" を削除しました","info");
+    };908
+  
 
 function clearForm(){
   ["fName","fAmt","fCal","fP","fF","fC"].forEach(function(id){
