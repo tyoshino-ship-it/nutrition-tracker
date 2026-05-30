@@ -352,7 +352,7 @@ button{cursor:pointer;background:none;border:none;}
   function initSB(url,key){
     try{
       sb=window.supabase.createClient(url,key);
-      setConn(null,"確認中…");
+      setConn(null,"確認中…");var _cTimer=setTimeout(function(){if(!connected){setConn(false,"接続失敗");}},8000);;
       sb.from("user_settings").select("user_key").limit(1).then(function(r){
         if(r.error)throw r.error;
         setConn(true,"接続済み");connected=true;window._sb=sb;window._goals=goals;loadSettingsFromDB();
